@@ -445,7 +445,7 @@ static  bool BuildScriptToken(CScript&script_token, CAmount amount,const  std::s
 
 
     //script_token << CScriptNum(amount).getvch() << ToByteVector(token_symbols) << OP_TOKEN;
-    script_token << CScriptNum(amount).getvch() << OP_TOKEN;
+    script_token << CScriptNum(amount).getvch() << OP_SMARTCONSTRACT;
     return  ret ;
 }
 
@@ -458,7 +458,7 @@ BOOST_AUTO_TEST_CASE(script_token)
     pubkey0 = key0.GetPubKey();
 
     CScript  script_token;
-    BuildScriptToken(script_token,10000000,"TestToken");
+    BuildScriptToken(script_token,20000000,"TestToken");
     script_token << ToByteVector(pubkey0) << OP_CHECKSIG;
     tests.push_back(TestBuilder(script_token, "TOKEN", 0).PushSig(key0));
     int i =0;
@@ -469,9 +469,39 @@ BOOST_AUTO_TEST_CASE(script_token)
         std::cout << "test " << i  << ": \n" << str << std::endl;
         i++;
     }
+}
 
+static bool BuildSmartContract(CScript&script_smart_contract)
+{
+    bool ret =true;
+
+    return ret;
+}
+
+BOOST_AUTO_TEST_CASE(script_smart_contract)
+{
+    std::vector<TestBuilder> tests;
+    CKey key0;
+    key0.MakeNewKey(true);
+    CPubKey  pubkey0;
+    pubkey0 = key0.GetPubKey();
+
+    CScript script_smart_contract;
+    BuildSmartContract(script_smart_contract);
+
+    script_smart_contract << ToByteVector(pubkey0) << OP_CHECKSIG;
+    tests.push_back(TestBuilder(script_smart_contract, "SMART_CONTRACT", 0).PushSig(key0));
+    int i =0;
+    BOOST_FOREACH (TestBuilder &test, tests)
+    {
+        test.Test(10000);
+        std::string str = JSONPrettyPrint(test.GetJSON());
+        std::cout << "test " << i  << ": \n" << str << std::endl;
+        i++;
+    }
 
 }
+
 BOOST_AUTO_TEST_CASE(sign_game)
 {
 

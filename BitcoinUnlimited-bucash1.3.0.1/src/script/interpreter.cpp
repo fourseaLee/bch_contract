@@ -328,6 +328,33 @@ static inline bool IsOpcodeDisabled(opcodetype opcode, uint32_t flags)
     return false;
 }
 
+bool EvalSmartContract(vector<vector<unsigned char> > &stack_smart_contract,bool only_compare_in_out=true)
+{
+
+    if ( stack_smart_contract.size() < 2)
+    {
+        return false;
+    }
+
+    if (only_compare_in_out)
+    {
+        valtype  token_in = stack_smart_contract.at(1);
+        valtype  token_out = stack_smart_contract.at(0);
+        CScriptNum bn1(token_in, true);
+        CScriptNum bn2(token_out, true);
+        uint64_t amount_in = bn1.getint64();
+        uint64_t amount_out = bn2.getint64();
+        if( bn1 < bn2 )
+        {
+            return false;
+        }
+    }
+
+
+    return true;
+
+}
+
 bool EvalScript(vector<vector<unsigned char> > &stack,
     const CScript &script,
     unsigned int flags,
@@ -350,6 +377,7 @@ bool EvalScript(vector<vector<unsigned char> > &stack,
     valtype vchPushValue;
     vector<bool> vfExec;
     vector<valtype> altstack;
+    vector<valtype> smartcontractstack;
     if (sighashtype)
         *sighashtype = 0;
 
@@ -511,9 +539,28 @@ bool EvalScript(vector<vector<unsigned char> > &stack,
 
                     break;
                 }
+                case OP_SMARTCONSTRACT:
+                {
+                    if (stack.size() < 2)
+                    {
+                        return set_error(serror,SCRIPT_ERR_SMART_CONSTRACT_INIT);
+                    }
+                    //pop out part of stack to smartcontractstack;
+                    smartcontractstack.push_back(stacktop(-2));
+                    smartcontractstack.push_back(stacktop(-1));
+                    popstack(stack);
+                    popstack(stack);
+                    //evrify the smart contract sanity
+                    if ( !EvalSmartContract(smartcontractstack) )
+                    {
+                         return set_error(serror,SCRIPT_ERR_SMART_CONSTRACT_VERIFY);
+                    }
+
+                    break;
+                }
 
                 case OP_NOP1:
-                case OP_NOP4:
+               // case OP_NOP4:
                 case OP_NOP5:
                 case OP_NOP6:
                 case OP_NOP7:

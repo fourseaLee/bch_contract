@@ -63,6 +63,10 @@ typedef enum ScriptError_t {
     /* softfork safeness */
     SCRIPT_ERR_DISCOURAGE_UPGRADABLE_NOPS,
 
+    /*smart constract error*/
+    SCRIPT_ERR_SMART_CONSTRACT_INIT,
+    SCRIPT_ERR_SMART_CONSTRACT_VERIFY,
+
     SCRIPT_ERR_ERROR_COUNT
 } ScriptError;
 
